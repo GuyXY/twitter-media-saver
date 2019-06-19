@@ -52,7 +52,24 @@ var Downloader = {
       if (link !== undefined) {
         link = Downloader.trimLarge(link);
         console.debug('Opening a download dialog with link ' + link);
-        chrome.runtime.sendMessage(undefined, link);
+        if (link.startsWith('blob:')) {
+          var form = $('<form/>', {
+            'method': 'post',
+            'action': 'http://127.0.0.1:9666/flash/add',
+            'target': 'download',
+	  });
+          var urls = $('<input/>', {
+            'name': 'urls',
+            'type': 'hidden',
+            'value': 'https://twitter.com' + parentTweet.attr('data-permalink-path'),
+	  });
+          $('body').append(Downloader.nestElements([form, urls]));
+	  var win = window.open('', 'download', 'height=1,width=1');
+          form.submit();
+          win.close();
+        } else {
+          chrome.runtime.sendMessage(undefined, link);
+        }
       }
     };
     var actionBar = parentTweet.find(
